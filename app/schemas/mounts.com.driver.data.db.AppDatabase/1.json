@@ -1,0 +1,178 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "8d67669e791f4f0643ec6ca5c79950b2",
+    "entities": [
+      {
+        "tableName": "User",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` INTEGER NOT NULL, `isSuccess` INTEGER, `sessionId` TEXT, `isCompleteProfile` INTEGER, PRIMARY KEY(`uid`))",
+        "fields": [
+          {
+            "fieldPath": "uid",
+            "columnName": "uid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSuccess",
+            "columnName": "isSuccess",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isCompleteProfile",
+            "columnName": "isCompleteProfile",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "uid"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "FCMToken",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tokenID` INTEGER NOT NULL, `fcmToken` TEXT, PRIMARY KEY(`tokenID`))",
+        "fields": [
+          {
+            "fieldPath": "tokenID",
+            "columnName": "tokenID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fcmToken",
+            "columnName": "fcmToken",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "tokenID"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "RealtimeToken",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tokenID` INTEGER NOT NULL, `token` TEXT, `user_id` INTEGER, PRIMARY KEY(`tokenID`))",
+        "fields": [
+          {
+            "fieldPath": "tokenID",
+            "columnName": "tokenID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "token",
+            "columnName": "token",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "user_id",
+            "columnName": "user_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "tokenID"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Payload",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`payloadID` INTEGER NOT NULL, `name` TEXT, `receiver_name` TEXT, `receiver_phone_number` TEXT, `receiver_address` TEXT, `user_lat` REAL, `user_lng` REAL, `receiver_lat` REAL, `receiver_lng` REAL, PRIMARY KEY(`payloadID`))",
+        "fields": [
+          {
+            "fieldPath": "payloadID",
+            "columnName": "payloadID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "receiver_name",
+            "columnName": "receiver_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "receiver_phone_number",
+            "columnName": "receiver_phone_number",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "receiver_address",
+            "columnName": "receiver_address",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "user_lat",
+            "columnName": "user_lat",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "user_lng",
+            "columnName": "user_lng",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "receiver_lat",
+            "columnName": "receiver_lat",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "receiver_lng",
+            "columnName": "receiver_lng",
+            "affinity": "REAL",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "payloadID"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8d67669e791f4f0643ec6ca5c79950b2')"
+    ]
+  }
+}
