@@ -7,30 +7,32 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.ViewModelStore
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapsInitializer
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.android.synthetic.main.fragment_gallery.*
+import kotlinx.android.synthetic.main.bottom_sheet_fragment.*
 import mounts.com.driver.Helpers.Driver
 import mounts.com.driver.R
 import mounts.com.driver.Util.GpsUtils
-import mounts.com.driver.data.repositories.MapRepsitory
-import mounts.com.driver.data.repositories.UserRepository
+import mounts.com.driver.Util.OnSwipeTouchListener
 import mounts.com.driver.databinding.FragmentHomeBinding
-import org.kodein.di.Kodein
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.x.kodein
 import org.kodein.di.generic.instance
@@ -42,10 +44,12 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
     private var isGPSEnabled = false
     lateinit var viewModel:HomeViewModel
      lateinit var binding :FragmentHomeBinding
+
     companion object{
         @JvmStatic
         lateinit var googleMap:GoogleMap
-
+        @JvmStatic
+        private var showBottomSheet:Int? = null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -55,9 +59,11 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
         viewModel = ViewModelProviders.of(this, factory).get(HomeViewModel::class.java)
         binding.viewModel = viewModel
 
+        showBottomSheet = activity?.intent?.getIntExtra("showBottomSheet",0)
+        Log.e("showBottomSheet",showBottomSheet.toString())
+
         val mapFragment: SupportMapFragment = this.childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
         binding.lifecycleOwner = this
 
         GpsUtils(context).turnGPSOn(object : GpsUtils.OnGpsListener {
@@ -67,7 +73,7 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
             }
         })
         viewModel.getLocationData().observe(this@HomeFragment, Observer {
-            viewModel.showMarker(LatLng(it.latitude, it.longitude), googleMap)
+          //  viewModel.showMarker(LatLng(it.latitude, it.longitude), googleMap)
         })
 
    if(viewModel.isSingInWithCustomToken()) {
@@ -76,7 +82,6 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
                 viewModel.signInWithCustomToken(token.token.toString())
                 Log.e("RealTime SignIn", "Success")
             } else {
-                //  textView2.setText("****  Real time token null ****")
                 Log.e("RealTime SignIn", "Fail")
             }
         })
@@ -84,8 +89,16 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
 
         viewModel.getPayloadData().observe(this@HomeFragment, Observer {
             if(it!=null){
-            viewModel.showUser(LatLng(it.receiver_lat!!.toDouble(),it.receiver_lng!!.toDouble()),googleMap)
-            Log.e("Payload","${it}")
+                if(showBottomSheet == 1){
+                    showBottomSheet = 0
+                    countDown()
+                }
+                if (it.receiver_lat != null && it.receiver_lng != null){
+                    viewModel.showUser(LatLng(it.receiver_lat!!.toDouble(),it.receiver_lng!!.toDouble()),googleMap)
+                }
+
+                Log.e("Payload","${it}")
+
             }
         })
 
@@ -115,7 +128,7 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
         mapFragment.getMapAsync(this)
         viewModel.getPayloadData().observe(viewLifecycleOwner, Observer {
             if(it!=null){
-                viewModel.showMarker(LatLng(it.receiver_lat!!.toDouble(),it.receiver_lng!!.toDouble()),googleMap)
+               // viewModel.showMarker(LatLng(it.receiver_lat!!.toDouble(),it.receiver_lng!!.toDouble()),googleMap)
                 Log.e("Payload","${it}")
             }
         })
@@ -124,6 +137,31 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
 //        viewModel.getLocationData().observe(this@HomeFragment, Observer {
 //        viewModel.showMarker(LatLng(it.latitude, it.longitude), googleMap)
 //        })
+    }
+
+    fun countDown(){
+        val dialogView: View = layoutInflater.inflate(R.layout.bottom_sheet_fragment, null)
+        val dialog = context?.let {
+            it1 -> BottomSheetDialog(it1,R.style.BottomSheetDialog)
+        }
+
+        dialog?.setCanceledOnTouchOutside(false)
+        dialog?.setContentView(dialogView)
+        dialog?.show()
+
+        var a =0
+        val timer = object : CountDownTimer(15000,1000){
+            override fun onTick(millisUntilFinished: Long) {
+                a= (millisUntilFinished/1000).toInt()
+                dialog?.countDownText?.setText("${a}"+" s")
+            }
+            override fun onFinish() {
+                dialog?.countDownText?.setText(a.toString()+" s")
+                //TODO:TO UNCOMMENT THIS LINE
+               // dialog?.cancel()
+            }
+        }.start()
+
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -134,7 +172,6 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
             }
         }
     }
-
     private fun invokeLocationAction() {
         when {
             !isGPSEnabled -> Log.e("GPS","NEEDED")// buildAlertMessageNoGps("Please Turn on your GPS Connection")
@@ -142,8 +179,6 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
             isPermissionsGranted() -> startLocationUpdate()
 
             shouldShowRequestPermissionRationale() ->Log.e("Permession","Needed")//buildAlertMessageNoGps(getString(R.string.permission_request))
-
-
             else -> ActivityCompat.requestPermissions(
                     requireActivity(),
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
@@ -165,7 +200,7 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
     private fun startLocationUpdate() {
         viewModel.getLocationData().observe(viewLifecycleOwner, Observer {
             ///latLong.text =  getString(R.string.latLong, it.longitude, it.latitude)
-            viewModel.showMarker(LatLng(it.latitude,it.longitude),googleMap)
+        //    viewModel.showMarker(LatLng(it.latitude,it.longitude),googleMap)
             Log.e("Current Loaction","${it.latitude } ,${it.longitude}")
 
 
@@ -225,7 +260,7 @@ class HomeFragment :Fragment(),OnMapReadyCallback,KodeinAware{
             }
             viewModel.getLocationData().observe(viewLifecycleOwner, Observer {
                 viewModel.updateDriver(Driver(it.latitude, it.longitude,FirebaseAuth.getInstance().uid.toString()))
-                viewModel.showMarker(LatLng(it.latitude, it.longitude), googleMap)
+             //   viewModel.showMarker(LatLng(it.latitude, it.longitude), googleMap)
                 if (it != null)
                     viewModel.animateCamera(LatLng(it.latitude, it.longitude), googleMap)
             })

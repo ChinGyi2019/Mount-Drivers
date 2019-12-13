@@ -24,4 +24,5 @@
     <string name="permission_request">App requires location permission</string>
 
     <string name="Staffs_Warehouse">Staffs &amp; Warehouse</string>
+    <string name="BottomSheetContent">Do you want to accept this? Please Accept or Decline within 15s !... </string>
 </resources>

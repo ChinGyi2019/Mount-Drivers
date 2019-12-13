@@ -3,12 +3,13 @@ package mounts.com.driver.Service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.os.Build
+import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -18,7 +19,8 @@ import mounts.com.driver.Util.Coroutines
 import mounts.com.driver.activity.MainActivity
 import mounts.com.driver.data.db.AppDatabase
 import mounts.com.driver.data.db.entities.Payload
-import mounts.com.driver.data.repositories.MapRepsitory
+import org.kodein.di.generic.contextFinder
+
 
 class MyFirebaseMessagingService: FirebaseMessagingService() {
 
@@ -38,25 +40,14 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        val notifyIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
+
+        val notifyIntent = Intent(this,MainActivity::class.java)
+        notifyIntent.putExtra("showBottomSheet",1)
         val notifyPendingIntent = PendingIntent.getActivity(
                 this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val notificationBuilder = NotificationCompat.Builder(this, "channel_ID").apply {
-                setContentTitle(remoteMessage.notification!!.title)
-                setContentText(remoteMessage.notification!!.body)
-                setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                setStyle(NotificationCompat.BigTextStyle())
-                setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                setSmallIcon(R.mipmap.ic_launcher)
-                setVibrate(longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400))
-                setLights(1, 1, 5000)
-                setAutoCancel(true)
-            setContentIntent(notifyPendingIntent)
-        }
+
 
 
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -77,6 +68,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 //            channel.vibrationPattern = longArrayOf(0, 1000, 500, 1000)
 //            channel.enableLights(true)
             notificationManager.createNotificationChannel(channel)
+
         }
 
         if (remoteMessage.data.size > 0) {
@@ -125,13 +117,28 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                 }catch (e:Exception){
                     Log.e("insert Payload","${e.message}")
                 }
-
-
         }
-        notificationManager.notify(0, notificationBuilder.build())
     }
+        val  notificationBuilder = NotificationCompat.Builder(applicationContext , "channel_ID").apply()
+        {
+            setContentTitle(remoteMessage.notification!!.title)
+            setContentText(remoteMessage.notification!!.body)
+            setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            setStyle(NotificationCompat.BigTextStyle())
+            setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+            setSmallIcon(R.mipmap.ic_launcher)
+            setVibrate(longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400))
+            setLights(1, 1, 5000)
+            setAutoCancel(true)
+            setTimeoutAfter(15000)
+            setContentIntent(notifyPendingIntent)
+        }
+        val notification = notificationBuilder.build()
+        notificationManager.notify(0, notification)
+       // startForeground(0,notification)
+
 }
-    override fun onNewToken(p0: String) {
+        override fun onNewToken(p0: String) {
         super.onNewToken(p0)
-    }
+        }
 }

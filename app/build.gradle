@@ -25,7 +25,7 @@ android {
     apply plugin: 'kotlin-android'
     apply plugin: 'kotlin-kapt'
 
-    dataBinding{
+    dataBinding {
         enabled = true
     }
     compileOptions {
@@ -41,8 +41,6 @@ android {
         }
     }
 }
-
-
 
 
 dependencies {
@@ -67,6 +65,8 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.1.0'
     implementation 'androidx.navigation:navigation-ui:2.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0'
     kapt "android.arch.lifecycle:compiler:1.1.0"
     //ROOM DATABASE
     implementation "androidx.room:room-runtime:2.2.0-rc01"
@@ -84,9 +84,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.6.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
     //databinding
-  //  implementation 'com.xwray:groupie:2.3.0'
+    //  implementation 'com.xwray:groupie:2.3.0'
     //implementation 'com.xwray:groupie-kotlin-android-extensions:2.3.0'
-   // implementation 'com.xwray:groupie-databinding:2.3.0'
+    // implementation 'com.xwray:groupie-databinding:2.3.0'
 
 
     implementation 'androidx.annotation:annotation:1.0.2'
